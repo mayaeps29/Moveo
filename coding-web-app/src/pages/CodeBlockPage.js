@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
-import { EditorState, basicSetup } from '@codemirror/basic-setup';
-import { javascript } from '@codemirror/lang-javascript';
-import { EditorView } from '@codemirror/view';
+import Editor from '@monaco-editor/react';
 
 const socket = io('http://localhost:3001');
 
@@ -14,66 +12,69 @@ const initialCodeBlocks = {
   4: 'console.log("Callback Case");',
 };
 
+const solutions = {
+  1: 'console.log("Async Case Solved!");',
+  2: 'console.log("Closure Case Solved!");',
+  3: 'console.log("Promise Case Solved!");',
+  4: 'console.log("Callback Case Solved!");',
+};
+
 const CodeBlockPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [role, setRole] = useState('student');
-  const [editorView, setEditorView] = useState(null);
+  const [code, setCode] = useState(initialCodeBlocks[id]);
+  const [studentCount, setStudentCount] = useState(0);
 
   useEffect(() => {
-    const state = EditorState.create({
-      doc: initialCodeBlocks[id],
-      extensions: [basicSetup, javascript()],
-    });
-
-    const view = new EditorView({
-      state,
-      parent: document.getElementById('editor'),
-    });
-
-    setEditorView(view);
-
     socket.on('connect', () => {
       console.log('connected to socket');
       socket.emit('join', { blockId: id });
 
       socket.on('role', (data) => {
         setRole(data.role);
-        if (data.role === 'mentor') {
-          view.dispatch({
-            effects: EditorView.editable.of(false),
-          });
-        }
       });
 
-      socket.on('code-update', (code) => {
-        view.dispatch({
-          changes: { from: 0, to: view.state.doc.length, insert: code },
-        });
+      socket.on('code-update', (updatedCode) => {
+        setCode(updatedCode);
+      });
+
+      socket.on('student-count', (data) => {
+        setStudentCount(data.count);
+      });
+
+      socket.on('redirect', () => {
+        navigate('/');
       });
     });
 
     return () => {
       socket.emit('leave', { blockId: id });
-      view.destroy();
+      socket.off(); // Clean up event listeners
     };
-  }, [id]);
+  }, [id, navigate]);
 
-  const handleCodeChange = () => {
-    const code = editorView.state.doc.toString();
-    socket.emit('code-change', { blockId: id, code });
-  };
+  const handleCodeChange = (newValue) => {
+    setCode(newValue);
+    socket.emit('code-change', { blockId: id, code: newValue });
 
-  useEffect(() => {
-    if (editorView && role === 'student') {
-      editorView.onUpdate = handleCodeChange;
+    if (newValue === solutions[id]) {
+      alert('🎉 You solved it! 🎉');
     }
-  }, [editorView, role]);
+  };
 
   return (
     <div>
       <h1>Code Block Page</h1>
       <h2>Role: {role}</h2>
-      <div id="editor"></div>
+      <h3>Students in room: {studentCount}</h3>
+      <Editor
+        height="90vh"
+        defaultLanguage="javascript"
+        value={code}
+        onChange={handleCodeChange}
+        options={{ readOnly: role === 'mentor' }}
+      />
     </div>
   );
 };
