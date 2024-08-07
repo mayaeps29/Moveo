@@ -22,6 +22,13 @@ let codeBlocks = {
   4: 'console.log("Callback Case");',
 };
 
+// Function to update student count and notify clients
+const updateStudentCount = (blockId) => {
+  const clientsInRoom = io.sockets.adapter.rooms.get(blockId) || new Set();
+  const studentCount = clientsInRoom.size - 1; // Subtract 1 for the mentor
+  io.to(blockId).emit('student-count', { count: studentCount });
+};
+
 io.on('connection', (socket) => {
   console.log('a user connected');
 
@@ -44,6 +51,8 @@ io.on('connection', (socket) => {
     } else {
       socket.emit('role', { role: 'student' });
     }
+
+    updateStudentCount(blockId);
   });
 
   socket.on('code-change', ({ blockId, code }) => {
