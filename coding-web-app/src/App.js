@@ -1,5 +1,7 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import LobbyPage from './pages/LobbyPage';
+import CodeBlockPage from './pages/CodeBlockPage'; // Ensure this file exists
 
 function App() {
   return (

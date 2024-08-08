@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import './LobbyPage.css';
 
 const codeBlocks = [
   { id: 1, name: 'Async Case' },
@@ -10,11 +11,11 @@ const codeBlocks = [
 
 const LobbyPage = () => {
   return (
-    <div>
+    <div className="lobby-container">
       <h1>Choose code block</h1>
-      <ul>
+      <ul className="code-block-list">
         {codeBlocks.map((block) => (
-          <li key={block.id}>
+          <li key={block.id} className="code-block-item">
             <Link to={`/code-block/${block.id}`}>{block.name}</Link>
           </li>
         ))}
