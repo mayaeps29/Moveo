@@ -23,10 +23,14 @@ let codeBlocks = {
   4: 'console.log("Callback Case");',
 };
 
-io.on('connect', (socket) => {
-  console.log('a user connected');
+const socketToBlockId = {};
+
+io.on('connection', (socket) => {
+  console.log('a user connected' + socket.id);
 
   socket.on('join', ({ blockId }) => {
+    socketToBlockId[socket.id] = blockId;  // Associate the socket.id with blockId
+    console.log('join, id=' + socket.id + ', blockId=' + blockId);
     if (!mentors[blockId]) {
       mentors[blockId] = socket.id;
       studentCounts[blockId] = (studentCounts[blockId] || 0);
@@ -44,7 +48,8 @@ io.on('connect', (socket) => {
     socket.to(blockId).emit('code-update', code);
   });
 
-  socket.on('leave', ({ blockId }) => {
+  socket.on('leave', ({ blockId}) => {
+    console.log('leave, id=' + socket.id + ', blockId=' + blockId);
     if (mentors[blockId] === socket.id) {
       delete mentors[blockId];
       studentCounts[blockId] = 0; // Reset student count on mentor leave
@@ -56,10 +61,29 @@ io.on('connect', (socket) => {
       io.to(blockId).emit('student-count', { count: studentCounts[blockId] });
     }
     socket.leave(blockId);
+    delete socketToBlockId[socket.id];  // Clean up the mapping
   });
 
   socket.on('disconnect', () => {
-    console.log('user disconnected');
+    const blockId = socketToBlockId[socket.id];
+    
+    if (!blockId) return;  // If blockId is not found, exit early
+  
+    console.log('disconnected, id=' + socket.id + ', blockId=' + blockId);
+    
+    if (mentors[blockId] === socket.id) {
+      delete mentors[blockId];
+      studentCounts[blockId] = 0; // Reset student count on mentor leave
+      io.to(blockId).emit('student-count', { count: studentCounts[blockId] });
+      io.to(blockId).emit('code-clear');  // Notify clients to clear code
+      io.to(blockId).emit('redirect');    // Notify clients to redirect
+    } else {
+      studentCounts[blockId] = Math.max((studentCounts[blockId] || 1) - 1, 0);
+      io.to(blockId).emit('student-count', { count: studentCounts[blockId] });
+    }
+    
+    socket.leave(blockId);
+    delete socketToBlockId[socket.id];  // Clean up the mapping
   });
 });
 
