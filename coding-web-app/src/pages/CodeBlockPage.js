@@ -1,7 +1,9 @@
+// src/pages/CodeBlockPage.js
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import Editor from '@monaco-editor/react';
+import './CodeBlockPage.css';
 
 const socket = io('http://localhost:3001');
 
@@ -64,8 +66,8 @@ const CodeBlockPage = () => {
   };
 
   return (
-    <div>
-      <h1>Code Block Page</h1>
+    <div className="code-block-container">
+      <h1>Code Block Page - Block {id}</h1>
       <h2>Role: {role}</h2>
       <h3>Students in room: {studentCount}</h3>
       <Editor

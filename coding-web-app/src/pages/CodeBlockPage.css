@@ -1,0 +1,36 @@
+/* src/pages/CodeBlockPage.css */
+.code-block-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    background-color: #f9f9f9;
+    min-height: 100vh;
+  }
+  
+  .code-block-title {
+    font-size: 2em;
+    margin-bottom: 20px;
+  }
+  
+  .role-indicator {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+  }
+  
+  .editor-container {
+    width: 80%;
+    max-width: 800px;
+    min-height: 400px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .smiley {
+    font-size: 3em;
+    color: green;
+    margin-top: 20px;
+  }
+  

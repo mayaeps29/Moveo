@@ -1,3 +1,4 @@
+/* src/pages/LobbyPage.css */
 .lobby-container {
     text-align: center;
   }
@@ -12,23 +13,19 @@
   
   .code-block-item {
     margin: 10px;
-    padding: 20px;
+    padding: 40px; /* Increased padding for larger blocks */
     background-color: pink;
     border-radius: 8px;
-    width: 200px;
+    width: 250px; /* Increased width */
     text-align: center;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: transform 0.2s;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    font-size: 1.5em; /* Increased font size */
   }
   
-  .code-block-item:hover {
-    transform: scale(1.05);
-  }
-  
-  .code-block-link {
+  .code-block-item a {
     text-decoration: none;
     color: black;
-    font-size: 18px;
     font-weight: bold;
+    font-size: 1.0em; /* Increased font size */
   }
   
