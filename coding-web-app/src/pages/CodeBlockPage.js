@@ -26,26 +26,27 @@ const CodeBlockPage = () => {
   const [role, setRole] = useState('student');
   const [code, setCode] = useState(initialCodeBlocks[id]);
   const [studentCount, setStudentCount] = useState(0);
+  const [solved, setSolved] = useState(false); // State to track if the problem is solved
 
   useEffect(() => {
-      console.log('connected to socket');
-      socket.emit('join', { blockId: id });
+    console.log('connected to socket');
+    socket.emit('join', { blockId: id });
 
-      socket.on('role', (data) => {
-        setRole(data.role);
-      });
+    socket.on('role', (data) => {
+      setRole(data.role);
+    });
 
-      socket.on('code-update', (updatedCode) => {
-        setCode(updatedCode);
-      });
+    socket.on('code-update', (updatedCode) => {
+      setCode(updatedCode);
+    });
 
-      socket.on('student-count', (data) => {
-        setStudentCount(data.count);
-      });
+    socket.on('student-count', (data) => {
+      setStudentCount(data.count);
+    });
 
-      socket.on('redirect', () => {
-        navigate('/');
-      });
+    socket.on('redirect', () => {
+      navigate('/');
+    });
 
     return () => {
       socket.emit('leave', { blockId: id });
@@ -58,7 +59,7 @@ const CodeBlockPage = () => {
     socket.emit('code-change', { blockId: id, code: newValue });
 
     if (newValue === solutions[id]) {
-      alert('🎉 You solved it! 🎉');
+      setSolved(true);  // Update the solved state
     }
   };
 
@@ -67,16 +68,20 @@ const CodeBlockPage = () => {
       <h1>Code Block Page - Block {id}</h1>
       <h2>Role: {role}</h2>
       <h3>Students in room: {studentCount}</h3>
-      <Editor
-        height="90vh"
-        defaultLanguage="javascript"
-        value={code}
-        onChange={handleCodeChange}
-        options={{ readOnly: role === 'mentor' }}
-      />
+      
+      {solved ? (
+        <div className="smiley-face">😊</div>  // Display smiley face when solved
+      ) : (
+        <Editor
+          height="90vh"
+          defaultLanguage="javascript"
+          value={code}
+          onChange={handleCodeChange}
+          options={{ readOnly: role === 'mentor' }}
+        />
+      )}
     </div>
   );
 };
-
 
 export default CodeBlockPage;
