@@ -15,6 +15,7 @@ const io = new Server(server, {
 });
 
 let mentors = {};
+let studentCounts = {};  // Track student counts for each room
 let codeBlocks = {
   1: 'console.log("Async Case");',
   2: 'console.log("Closure Case");',
@@ -22,65 +23,38 @@ let codeBlocks = {
   4: 'console.log("Callback Case");',
 };
 
-// Function to update student count and notify clients
-const updateStudentCount = (blockId) => {
-  const clientsInRoom = io.sockets.adapter.rooms.get(blockId) || new Set();
-  const studentCount = clientsInRoom.size - 1; // Subtract 1 for the mentor
-  io.to(blockId).emit('student-count', { count: studentCount });
-};
-
 io.on('connection', (socket) => {
   console.log('a user connected');
 
   socket.on('join', ({ blockId }) => {
-    const clientsInRoom = io.sockets.adapter.rooms.get(blockId) || new Set();
-    const isMentor = clientsInRoom.size === 0; // The first person to join is the mentor
-    console.log(isMentor);
-    if (isMentor) {
+    if (!mentors[blockId]) {
       mentors[blockId] = socket.id;
+      studentCounts[blockId] = (studentCounts[blockId] || 0);
+      socket.emit('role', { role: 'mentor' });
     } else {
+      studentCounts[blockId] = (studentCounts[blockId] || 0) + 1;
       socket.emit('role', { role: 'student' });
     }
-
     socket.join(blockId);
-    socket.emit('code-update', codeBlocks[blockId]);
-
-    // Notify all clients in the room about the role
-    if (isMentor) {
-      io.to(blockId).emit('role', { role: 'mentor' });
-    } else {
-      socket.emit('role', { role: 'student' });
-    }
-
-    updateStudentCount(blockId);
+    io.to(blockId).emit('student-count', { count: studentCounts[blockId] });
   });
 
   socket.on('code-change', ({ blockId, code }) => {
-    console.log(code);
     codeBlocks[blockId] = code;
     socket.to(blockId).emit('code-update', code);
   });
 
   socket.on('leave', ({ blockId }) => {
     if (mentors[blockId] === socket.id) {
-      // If the mentor leaves, assign a new mentor if available
       delete mentors[blockId];
-      const clientsInRoom = io.sockets.adapter.rooms.get(blockId) || new Set();
-      const newMentorId = Array.from(clientsInRoom)[0]; // Get the new mentor (first person in room)
-      if (newMentorId) {
-        mentors[blockId] = newMentorId;
-        io.to(newMentorId).emit('role', { role: 'mentor' });
-        io.to(blockId).emit('role', { role: 'student' });
-      } else {
-        // If no mentor remains, notify all clients to redirect
-        io.to(blockId).emit('redirect');
-      }
+      studentCounts[blockId] = 0; // Reset student count on mentor leave
+      io.to(blockId).emit('student-count', { count: studentCounts[blockId] });
+      io.to(blockId).emit('code-clear');  // Notify clients to clear code
+      io.to(blockId).emit('redirect');    // Notify clients to redirect
     } else {
-      // Notify remaining clients in the room about student count
-      const remainingClients = io.sockets.adapter.rooms.get(blockId) || new Set();
-      io.to(blockId).emit('student-count', { count: remainingClients.size });
+      studentCounts[blockId] = Math.max((studentCounts[blockId] || 1) - 1, 0);
+      io.to(blockId).emit('student-count', { count: studentCounts[blockId] });
     }
-
     socket.leave(blockId);
   });
 

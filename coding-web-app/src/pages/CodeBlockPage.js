@@ -1,4 +1,3 @@
-// src/pages/CodeBlockPage.js
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
@@ -80,5 +79,6 @@ const CodeBlockPage = () => {
     </div>
   );
 };
+
 
 export default CodeBlockPage;

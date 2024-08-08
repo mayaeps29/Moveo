@@ -4,7 +4,7 @@
     flex-direction: column;
     align-items: center;
     padding: 20px;
-    background-color: #f9f9f9;
+    background-color: pink;
     min-height: 100vh;
   }
   
@@ -29,8 +29,11 @@
   }
   
   .smiley {
-    font-size: 3em;
+    font-size: 5em;
     color: green;
     margin-top: 20px;
+    text-align: center;
+    display: inline-block; /* Ensure it’s displayed correctly */
   }
+  
   
