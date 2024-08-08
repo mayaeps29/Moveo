@@ -23,7 +23,7 @@ let codeBlocks = {
   4: 'console.log("Callback Case");',
 };
 
-io.on('connection', (socket) => {
+io.on('connect', (socket) => {
   console.log('a user connected');
 
   socket.on('join', ({ blockId }) => {
