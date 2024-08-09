@@ -23,6 +23,13 @@ let codeBlocks = {
   4: 'console.log("Callback Case");',
 };
 
+const solutions = {
+  1: 'console.log("Async Case Solved!");',
+  2: 'console.log("Closure Case Solved!");',
+  3: 'console.log("Promise Case Solved!");',
+  4: 'console.log("Callback Case Solved!");',
+};
+
 const socketToBlockId = {};
 
 io.on('connection', (socket) => {
@@ -46,6 +53,10 @@ io.on('connection', (socket) => {
   socket.on('code-change', ({ blockId, code }) => {
     codeBlocks[blockId] = code;
     socket.to(blockId).emit('code-update', code);
+  
+    if (code === solutions[blockId]) {
+      io.to(blockId).emit('solved');  // Notify all clients in the room that the problem is solved
+    }
   });
 
   socket.on('leave', ({ blockId}) => {

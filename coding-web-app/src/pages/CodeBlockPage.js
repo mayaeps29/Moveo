@@ -13,13 +13,6 @@ const initialCodeBlocks = {
   4: 'console.log("Callback Case");',
 };
 
-const solutions = {
-  1: 'console.log("Async Case Solved!");',
-  2: 'console.log("Closure Case Solved!");',
-  3: 'console.log("Promise Case Solved!");',
-  4: 'console.log("Callback Case Solved!");',
-};
-
 const CodeBlockPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -44,6 +37,10 @@ const CodeBlockPage = () => {
       setStudentCount(data.count);
     });
 
+    socket.on('solved', () => {
+      setSolved(true);  // This triggers the smiley face display
+    });
+
     socket.on('redirect', () => {
       navigate('/');
     });
@@ -51,16 +48,15 @@ const CodeBlockPage = () => {
     return () => {
       socket.emit('leave', { blockId: id });
       socket.off(); // Clean up event listeners
+      setSolved(false);
     };
   }, [id, navigate]);
 
+  debugger;
   const handleCodeChange = (newValue) => {
     setCode(newValue);
     socket.emit('code-change', { blockId: id, code: newValue });
 
-    if (newValue === solutions[id]) {
-      setSolved(true);  // Update the solved state
-    }
   };
 
   return (
@@ -68,18 +64,15 @@ const CodeBlockPage = () => {
       <h1>Code Block Page - Block {id}</h1>
       <h2>Role: {role}</h2>
       <h3>Students in room: {studentCount}</h3>
-      
-      {solved ? (
-        <div className="smiley-face">😊</div>  // Display smiley face when solved
-      ) : (
-        <Editor
-          height="90vh"
-          defaultLanguage="javascript"
-          value={code}
-          onChange={handleCodeChange}
-          options={{ readOnly: role === 'mentor' }}
-        />
-      )}
+  
+      <Editor
+        height="90vh"
+        defaultLanguage="javascript"
+        value={code}
+        onChange={handleCodeChange}
+        options={{ readOnly: role === 'mentor' }}
+      />
+      {solved && <div className="smiley">😊</div>}
     </div>
   );
 };
