@@ -4,6 +4,7 @@ import { io } from 'socket.io-client';
 import Editor from '@monaco-editor/react';
 import './CodeBlockPage.css';
 
+//const socket = io('http://localhost:3001');
 const socket = io('https://moveo-production-cea5.up.railway.app');
 
 const initialCodeBlocks = {
@@ -69,7 +70,7 @@ const CodeBlockPage = () => {
 
   return (
     <div className="code-block-container">
-      <h1> {blockNames[id]} Code Block Page - id {id}</h1>
+      <h1> {blockNames[id]} Code Block Page </h1>
       <h2>Role: {role}</h2>
       <h3>Students in room: {studentCount}</h3>
   
