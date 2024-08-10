@@ -33,6 +33,7 @@ const CodeBlockPage = () => {
     socket.emit('join', { blockId: id });
 
     socket.on('role', (data) => {
+
       setRole(data.role);
     });
 
