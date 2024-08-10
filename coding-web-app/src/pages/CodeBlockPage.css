@@ -21,7 +21,7 @@
   .editor-container {
     width: 80%;
     max-width: 800px;
-    min-height: 400px;
+    min-height: 200px;
     background-color: white;
     border: 1px solid #ddd;
     border-radius: 8px;
@@ -42,6 +42,22 @@
     top: 0;
     left: 0;
     z-index: 9999; /* Make sure it's above everything else */
+  }
+
+  .hints-section {
+    margin-top: 20px;
+  }
+  
+  .hints-section ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .hints-section li {
+    background-color: #f0f0f0;
+    margin: 5px 0;
+    padding: 10px;
+    border-radius: 5px;
   }
   
   
