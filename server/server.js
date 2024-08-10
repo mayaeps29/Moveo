@@ -2,14 +2,16 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
+const mysql = require('mysql2');
 
 const app = express();
 app.use(cors());
 
+
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    //origin: 'http://localhost:3000',
+    // origin: 'http://localhost:3000',
     origin: 'https://master--clinquant-smakager-c176c0.netlify.app',
     methods: ['GET', 'POST'],
   },
@@ -24,12 +26,60 @@ let codeBlocks = {
   4: 'console.log("Callback Case");',
 };
 
-const solutions = {
-  1: 'console.log("Async Case Solved!");',
-  2: 'console.log("Closure Case Solved!");',
-  3: 'console.log("Promise Case Solved!");',
-  4: 'console.log("Callback Case Solved!");',
+
+let solutions = {
+  1: 'solution 1',
+  2: 'solution 2',
+  3: 'solution 3',
+  4: 'solution 4',
 };
+
+const readSolutionsFromDB = (callback) => {
+  const connection = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: '123456',
+    database: 'moveo',
+  });
+
+  connection.connect((err) => {
+    if (err) {
+      console.error('Error connecting to MySQL:', err.stack);
+      return;
+    }
+    console.log('Connected to MySQL as id', connection.threadId);
+  });
+
+  const query = 'SELECT * FROM `moveo`.`codes_solutions`;';
+
+  connection.query(query, (err, results) => {
+    if (err) {
+      console.error('Error executing query:', err.stack);
+      return;
+    }
+
+    results.forEach(row => {
+      if (solutions.hasOwnProperty(row.id)) {
+        solutions[row.id] = row.code;
+      }
+    });
+
+    // Call the callback function with the updated solutions
+    callback(solutions);
+
+    connection.end(); // Close the connection
+  });
+};
+
+// Usage of the function
+readSolutionsFromDB((updatedSolutions) => {
+  console.log('Updated Solutions:', updatedSolutions);
+  if (Object.entries(updatedSolutions).length == 4)
+  {
+    solutions = updatedSolutions;  
+  }
+});
+
 
 const socketToBlockId = {};
 
