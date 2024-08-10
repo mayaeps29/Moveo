@@ -11,8 +11,8 @@ app.use(cors());
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: 'http://localhost:3000',
-    //origin: 'https://master--clinquant-smakager-c176c0.netlify.app',
+    //origin: 'http://localhost:3000',
+    origin: 'https://master--clinquant-smakager-c176c0.netlify.app',
     methods: ['GET', 'POST'],
   },
 });
@@ -43,10 +43,15 @@ let solutions = {
 
 const readSolutionsFromDB = (callback) => {
   const connection = mysql.createConnection({
-    host: 'localhost',
+    /*host: 'localhost',
     user: 'root',
     password: '123456',
-    database: 'moveo',
+    database: 'moveo',*/
+    host: 'monorail.proxy.rlwy.net',
+    user: 'root',
+    password: 'OOCeDAtvRqmkSHTgORaKsfeuNrugfPvy',
+    database: 'railway',
+    port: 10306,
   });
 
   connection.connect((err) => {
@@ -57,7 +62,7 @@ const readSolutionsFromDB = (callback) => {
     console.log('Connected to MySQL as id', connection.threadId);
   });
 
-  const query = 'SELECT * FROM `moveo`.`codes_solutions`;';
+  const query = 'SELECT * FROM `codes_solutions`;';
 
   connection.query(query, (err, results) => {
     if (err) {

@@ -4,8 +4,8 @@ import { io } from 'socket.io-client';
 import Editor from '@monaco-editor/react';
 import './CodeBlockPage.css';
 
-const socket = io('http://localhost:3001');
-//const socket = io('https://moveo-production-cea5.up.railway.app');
+// const socket = io('http://localhost:3001');
+const socket = io('https://moveo-production-cea5.up.railway.app');
 
 const blockNames = {
   1: 'Async',
