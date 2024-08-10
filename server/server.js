@@ -11,11 +11,18 @@ app.use(cors());
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    // origin: 'http://localhost:3000',
-    origin: 'https://master--clinquant-smakager-c176c0.netlify.app',
+    origin: 'http://localhost:3000',
+    //origin: 'https://master--clinquant-smakager-c176c0.netlify.app',
     methods: ['GET', 'POST'],
   },
 });
+
+const initialCodeBlocks = {
+  1: 'console.log("Async Case");',
+  2: 'console.log("Closure Case");',
+  3: 'console.log("Promise Case");',
+  4: 'console.log("Callback Case");',
+};
 
 let mentors = {};
 let studentCounts = {};  // Track student counts for each room
@@ -98,6 +105,8 @@ io.on('connection', (socket) => {
       socket.emit('role', { role: 'student' });
     }
     socket.join(blockId);
+    const currentCode = codeBlocks[blockId];
+    socket.emit('code-update', currentCode);
     io.to(blockId).emit('student-count', { count: studentCounts[blockId] });
   });
 
@@ -110,8 +119,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('leave', ({ blockId}) => {
-    console.log('leave, id=' + socket.id + ', blockId=' + blockId);
+  const leaveOrDisconnect = (blockId) => {
     if (mentors[blockId] === socket.id) {
       delete mentors[blockId];
       studentCounts[blockId] = 0; // Reset student count on mentor leave
@@ -120,32 +128,26 @@ io.on('connection', (socket) => {
       io.to(blockId).emit('redirect');    // Notify clients to redirect
     } else {
       studentCounts[blockId] = Math.max((studentCounts[blockId] || 1) - 1, 0);
+      if (studentCounts[blockId] === 0) {
+        codeBlocks[blockId] = initialCodeBlocks[blockId]; // Reset the code to the initial code
+        io.to(blockId).emit('code-update', codeBlocks[blockId]);  // Send the reset code to clients
+      }
       io.to(blockId).emit('student-count', { count: studentCounts[blockId] });
     }
     socket.leave(blockId);
     delete socketToBlockId[socket.id];  // Clean up the mapping
+  }
+
+  socket.on('leave', ({ blockId}) => {
+    console.log('leave, id=' + socket.id + ', blockId=' + blockId);
+    leaveOrDisconnect(blockId);
   });
 
   socket.on('disconnect', () => {
     const blockId = socketToBlockId[socket.id];
-    
     if (!blockId) return;  // If blockId is not found, exit early
-  
     console.log('disconnected, id=' + socket.id + ', blockId=' + blockId);
-    
-    if (mentors[blockId] === socket.id) {
-      delete mentors[blockId];
-      studentCounts[blockId] = 0; // Reset student count on mentor leave
-      io.to(blockId).emit('student-count', { count: studentCounts[blockId] });
-      io.to(blockId).emit('code-clear');  // Notify clients to clear code
-      io.to(blockId).emit('redirect');    // Notify clients to redirect
-    } else {
-      studentCounts[blockId] = Math.max((studentCounts[blockId] || 1) - 1, 0);
-      io.to(blockId).emit('student-count', { count: studentCounts[blockId] });
-    }
-    
-    socket.leave(blockId);
-    delete socketToBlockId[socket.id];  // Clean up the mapping
+    leaveOrDisconnect(blockId);
   });
 });
 

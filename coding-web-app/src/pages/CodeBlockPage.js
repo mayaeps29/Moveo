@@ -4,15 +4,8 @@ import { io } from 'socket.io-client';
 import Editor from '@monaco-editor/react';
 import './CodeBlockPage.css';
 
-// const socket = io('http://localhost:3001');
-const socket = io('https://moveo-production-cea5.up.railway.app');
-
-const initialCodeBlocks = {
-  1: 'console.log("Async Case");',
-  2: 'console.log("Closure Case");',
-  3: 'console.log("Promise Case");',
-  4: 'console.log("Callback Case");',
-};
+const socket = io('http://localhost:3001');
+//const socket = io('https://moveo-production-cea5.up.railway.app');
 
 const blockNames = {
   1: 'Async',
@@ -25,7 +18,7 @@ const CodeBlockPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [role, setRole] = useState('student');
-  const [code, setCode] = useState(initialCodeBlocks[id]);
+  const [code, setCode] = useState('');
   const [studentCount, setStudentCount] = useState(0);
   const [solved, setSolved] = useState(false); // State to track if the problem is solved
 
@@ -34,7 +27,6 @@ const CodeBlockPage = () => {
     socket.emit('join', { blockId: id });
 
     socket.on('role', (data) => {
-
       setRole(data.role);
     });
 
