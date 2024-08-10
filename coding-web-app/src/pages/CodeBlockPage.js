@@ -13,6 +13,13 @@ const initialCodeBlocks = {
   4: 'console.log("Callback Case");',
 };
 
+const blockNames = {
+  1: 'Async',
+  2: 'Closure',
+  3: 'Promise',
+  4: 'Callback',
+};
+
 const CodeBlockPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -61,7 +68,7 @@ const CodeBlockPage = () => {
 
   return (
     <div className="code-block-container">
-      <h1>Code Block Page - Block {id}</h1>
+      <h1> {blockNames[id]} Code Block Page - id {id}</h1>
       <h2>Role: {role}</h2>
       <h3>Students in room: {studentCount}</h3>
   
